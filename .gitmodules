@@ -1,3 +1,4 @@
 [submodule "libs/drivers"]
 	path = libs/drivers
 	url = https://github.com/sg9924/stm32f103_Drivers.git
+	branch = main
