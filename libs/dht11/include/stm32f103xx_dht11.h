@@ -3,15 +3,27 @@
 
 #include"stm32f103xx.h"
 #include"stm32f103xx_core.h"
-#include"stm32f103xx_memory_map.h"
 #include"stm32f103xx_gpio.h"
 
+#define DHT11_SAMPLE_DELAY_US              40U     //sample point after a rising edge
+#define DHT11_BIT_TIMEOUT_US               120U    //max wait for any single data edge
+#define DHT11_FRAME_TIMEOUT_US             8000U   //cap on the whole 40-bit frame
+#define DHT11_TIMEOUT_DEFAULT_MS           30U
+
+#define DWT_CYCLES_PER_US                (RCC_Get_SYSCLK() / 1000000U)
+#define DWT_US_TO_CYCLES(us)             ((uint32_t)(us) * DWT_CYCLES_PER_US)
 
 
-#define DHT11_TIMEOUT                      10000
-#define DHT11_STATUS_OK                    0
-#define DHT11_STATUS_ERROR                 1
-#define DHT11_STATUS_CHECKSUM_ERROR        2
+//Status
+typedef enum
+{
+    DHT11_OK = 0,
+    DHT11_ERR_TIMEOUT,
+    DHT11_ERR_CHECKSUM,
+    DHT11_ERR_IMPLAUSIBLE,
+} DHT11_Status_t;
+
+
 
 //DHT11 Handle Structure
 typedef struct
@@ -29,8 +41,8 @@ typedef struct
 
 //API's
 DHT11_Handle* DHT11_Init(GPIO_RegDef* pGPIOx, uint8_t gpio_pin);
-uint8_t DHT11_ReadDataRaw(float* ptemp, float* phum);
-uint8_t DHT11_Read_Data();
+uint8_t DHT11_ReadDataRaw(float* ptemp, float* phum, uint32_t response_timeout_ms);
+uint8_t DHT11_Read_Data(uint32_t response_timeout_ms);
 float DHT11_HeatIndex_Calculate(float tempC, float humidity);
 
 
