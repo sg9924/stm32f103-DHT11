@@ -41,7 +41,7 @@ typedef struct
 
 //API's
 void DHT11_Init(DHT11_Handle* h, GPIO_RegDef* pGPIOx, uint8_t gpio_pin);
-uint8_t DHT11_ReadDataRaw(DHT11_Handle* h, float* ptemp, float* phum, uint32_t response_timeout_ms);
+uint8_t DHT11_ReadDataRaw(DHT11_Handle* h, uint32_t response_timeout_ms);
 uint8_t DHT11_Read_Data(DHT11_Handle* h, uint32_t response_timeout_ms);
 float DHT11_HeatIndex_Calculate(float tempC, float humidity);
 

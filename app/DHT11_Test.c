@@ -16,7 +16,7 @@ int main()
 	{
         if(DHT11_Read_Data(&D1, DHT11_TIMEOUT_DEFAULT_MS) == DHT11_OK)
         {
-            led_toggle();
+            led_flash(4, 100);
             Serialprintln("DHT11: Temp: %.2fC | Hum: %.2f%%", INFO, D1.temperature, D1.humidity);
         }
         

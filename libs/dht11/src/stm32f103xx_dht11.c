@@ -12,7 +12,7 @@ static uint8_t dht11_start_internal(DHT11_Handle* h, uint32_t response_timeout_u
 static DHT11_Status_t dht11_read_frame(DHT11_Handle* h);
 static inline DHT11_Status_t dht11_read_byte(DHT11_Handle* h, uint8_t* byte);
 static bool dht11_wait_for_level(DHT11_Handle* h, uint8_t level, uint32_t timeout_us);
-static inline uint8_t dht11_pin_level(const DHT11_Handle* h);
+static inline uint8_t dht11_pin_level(DHT11_Handle* h);
 
 
 
@@ -39,14 +39,14 @@ void DHT11_Init(DHT11_Handle* h, GPIO_RegDef* pGPIOx, uint8_t gpio_pin)
 uint8_t DHT11_Read_Data(DHT11_Handle* h, uint32_t response_timeout_ms)
 {
 	response_timeout_ms = (response_timeout_ms == 0)?DHT11_TIMEOUT_DEFAULT_MS:response_timeout_ms;
-	h->last_status      = DHT11_ReadDataRaw(h, &h->temperature, &h->humidity, response_timeout_ms);
+	h->last_status      = DHT11_ReadDataRaw(h, response_timeout_ms);
 
 	return h->last_status;
 }
 
 
 
-uint8_t DHT11_ReadDataRaw(DHT11_Handle* h, float* ptemp, float* phum, uint32_t response_timeout_ms)
+uint8_t DHT11_ReadDataRaw(DHT11_Handle* h, uint32_t response_timeout_ms)
 {
 	DHT11_Status_t st;
     
@@ -61,8 +61,8 @@ uint8_t DHT11_ReadDataRaw(DHT11_Handle* h, float* ptemp, float* phum, uint32_t r
 		ENABLE_IRQ();
     }
     
-	*phum  = 0.0f;
-    *ptemp = 0.0f;
+	h->humidity    = 0.0f;
+    h->temperature = 0.0f;
 
 	if (st == DHT11_OK)
     {
@@ -70,8 +70,8 @@ uint8_t DHT11_ReadDataRaw(DHT11_Handle* h, float* ptemp, float* phum, uint32_t r
 		if((uint8_t)(h->raw_data[0] + h->raw_data[1] + h->raw_data[2] + h->raw_data[3]) == h->raw_data[4])
 		{
 			//Convert data to Float
-			*phum  = (float)h->raw_data[0] + (float)h->raw_data[1]/10.0;
-			*ptemp = (float)h->raw_data[2] + (float)h->raw_data[3]/10.0;
+			h->humidity    = (float)h->raw_data[0] + (float)h->raw_data[1]/10.0;
+			h->temperature = (float)h->raw_data[2] + (float)h->raw_data[3]/10.0;
 
 			//log status as Success
 			st = DHT11_OK;
@@ -240,7 +240,7 @@ static bool dht11_wait_for_level(DHT11_Handle* h, uint8_t level, uint32_t timeou
 
 
 
-static inline uint8_t dht11_pin_level(const DHT11_Handle* h)
+static inline uint8_t dht11_pin_level(DHT11_Handle* h)
 {
     return (GPIO_PIN_READ(h->pGPIOx, h->gpio_pin) != 0U) ? 1U : 0U;
 }
